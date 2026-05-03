@@ -1,0 +1,148 @@
+{
+  "name": "Standards Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "schedule-weekly",
+      "name": "Weekly",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /workspace/MCP-Compliance-Scan && npm run check:standards:json"
+      },
+      "id": "run-standards-check",
+      "name": "Run standards check",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        240,
+        0
+      ],
+      "notes": "For Docker n8n, this requires the repo mounted at /workspace/MCP-Compliance-Scan and dependencies installed on the host or in the container. Keep credentials in the local n8n instance, not in this template."
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $json.stdout ?? $json.data ?? '';\nconst parsed = typeof stdout === 'string' ? JSON.parse(stdout.replace(/^.*?\\{/, '{')) : stdout;\nreturn [{ json: parsed }];"
+      },
+      "id": "parse-json",
+      "name": "Parse report JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-updates",
+              "leftValue": "={{ $json.summary.updateCount + $json.summary.errorCount }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "updates-or-errors",
+      "name": "Updates or errors?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const actionable = $json.results.filter((result) => result.status === 'update_available' || result.status === 'error');\nreturn [{ json: { checkedAt: $json.checkedAt, summary: $json.summary, actionable } }];"
+      },
+      "id": "prepare-notification",
+      "name": "Prepare notification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        -120
+      ],
+      "notes": "Connect this to your local Slack, email, GitHub issue, or webhook credential after import. Do not commit exported credentials."
+    }
+  ],
+  "connections": {
+    "Weekly": {
+      "main": [
+        [
+          {
+            "node": "Run standards check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run standards check": {
+      "main": [
+        [
+          {
+            "node": "Parse report JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse report JSON": {
+      "main": [
+        [
+          {
+            "node": "Updates or errors?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Updates or errors?": {
+      "main": [
+        [
+          {
+            "node": "Prepare notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

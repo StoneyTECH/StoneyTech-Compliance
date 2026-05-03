@@ -1,0 +1,44 @@
+{
+  "name": "mcp-compliance-scan",
+  "version": "0.1.0",
+  "description": "Local-first compliance MCP server and CLI for deterministic code review checks.",
+  "type": "module",
+  "private": false,
+  "bin": {
+    "mcp-compliance-scan": "dist/cli.js",
+    "mcp-compliance-scan-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "check:standards": "tsx scripts/check-standards.ts --format=markdown --fail-on=updates",
+    "check:standards:json": "tsx scripts/check-standards.ts --format=json --fail-on=never",
+    "cli": "tsx src/cli.ts",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "compliance",
+    "code-review"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/StoneyTECH/MCP-Compliance-Scan.git"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
+}

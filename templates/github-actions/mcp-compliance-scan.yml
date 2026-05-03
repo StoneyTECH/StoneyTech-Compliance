@@ -1,0 +1,67 @@
+name: Compliance Review
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  compliance:
+    name: Compliance Review
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Checkout compliance tool
+        uses: actions/checkout@v4
+        with:
+          repository: StoneyTECH/MCP-Compliance-Scan
+          path: .mcp-compliance-scan
+
+      - name: Build compliance engine
+        working-directory: .mcp-compliance-scan
+        run: npm ci && npm run build
+
+      - name: Run compliance review
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git fetch origin "${{ github.base_ref }}" --depth=1
+            node .mcp-compliance-scan/dist/cli.js review \
+              --repo . \
+              --mode range \
+              --base "origin/${{ github.base_ref }}" \
+              --target HEAD \
+              --profile security \
+              --format github \
+              --fail-on high
+          else
+            BASE_SHA="${{ github.event.before }}"
+            if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ ]]; then
+              BASE_SHA="HEAD^"
+            fi
+
+            node .mcp-compliance-scan/dist/cli.js audit-merge \
+              --repo . \
+              --base "$BASE_SHA" \
+              --target "${{ github.sha }}" \
+              --profile security \
+              --format github \
+              --fail-on high
+          fi
