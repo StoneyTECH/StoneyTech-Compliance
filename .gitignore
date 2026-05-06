@@ -1,0 +1,25 @@
+node_modules/
+dist/
+coverage/
+.DS_Store
+*.log
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Local-only runtime state. Public repo templates live elsewhere.
+.local/
+local/
+data/
+audit-runs/
+reports/
+exports/
+.n8n/
+n8n-data/
+credentials/
+
