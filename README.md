@@ -4,6 +4,11 @@ Local-first MCP server for code-review compliance checks. It is designed to run 
 
 MCP Compliance Scan is free StoneyTECH software. The project keeps a generic tool name so teams can install it as a purpose-built MCP compliance scanner, while the source and ongoing work are maintained by [StoneyTECH](https://www.stoneytech.net).
 
+See also:
+
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [SECURITY.md](SECURITY.md)
+
 ## MCP Tools
 
 - `review_diff` reviews supplied unified diff text.
@@ -207,6 +212,6 @@ MCP clients can also initialize and write to it with `init_audit_db`, `review_re
 
 ## Public Repo Boundary
 
-This repo is designed so it can be made public later. Keep only code, schemas, docs, and sanitized workflow templates in GitHub. Keep local n8n runtime data, credentials, execution logs, audit databases, and generated reports in ignored local paths such as `.local/`.
+This repo is public-safe by design. Keep only code, schemas, docs, and sanitized workflow templates in GitHub. Keep local n8n runtime data, credentials, execution logs, audit databases, and generated reports in ignored local paths such as `.local/`.
 
 See [docs/public-repo-local-data.md](docs/public-repo-local-data.md).
